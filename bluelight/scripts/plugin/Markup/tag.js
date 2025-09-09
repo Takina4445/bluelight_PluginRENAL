@@ -117,11 +117,21 @@ getByid("medicalSpecialtyTag").onchange = function () {
 
 getByid("saveTAG").onclick = function () {
     getByid("saveTAG").style.display = "none";
-    //getByid("writeTAG").src = '../image/icon/lite/tag_off.png';
     img2darkByClass("TAG", true);
     getByid('TagStyleDiv').style.display = 'none';
     SetTable();
     displayMark();
+
+    if (getByid("medicalSpecialtyTag").value === "R.E.N.A.L.") {
+        // 跳轉到 tag_RENAL.js 處理
+        if (typeof handleRENALTag === "function") {
+            handleRENALTag();
+        } else {
+            console.error("tag_RENAL.js 未加載或 handleRENALTag 函數未定義");
+        }
+        return;
+    }
+
     function download(text, name, type) {
         let a = document.createElement('a');
         let file = new Blob([text], {
