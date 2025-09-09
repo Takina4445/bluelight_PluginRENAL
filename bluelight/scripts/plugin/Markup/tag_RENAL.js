@@ -1,5 +1,6 @@
 function handleRENALTag() {
     console.log("handleRENALTag");
+
     // 獲取當前視窗的 SeriesInstanceUID 和 StudyInstanceUID
     let index = SearchUid2Index(GetViewport().sop);
     let i = index[0], j = index[1], k = index[2];
@@ -16,6 +17,18 @@ function handleRENALTag() {
     let nValue = nSelector ? nSelector.value : "";
     let lValue = lSelector ? lSelector.value : "";
 
+    // XML escape function（使用 DOM 自動處理特殊字元）
+    function escapeXML(value) {
+        let div = document.createElement("div");
+        div.appendChild(document.createTextNode(value));
+        return div.innerHTML;
+    }
+
+    // 對值進行轉換，避免 < > & 等特殊字元破壞 XML
+    let eValueEscaped = escapeXML(eValue);
+    let nValueEscaped = escapeXML(nValue);
+    let lValueEscaped = escapeXML(lValue);
+
     // 生成 XML 內容
     let xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
     <file-format>
@@ -29,9 +42,9 @@ function handleRENALTag() {
             <element tag="0020,000D" vr="UI" vm="1" len="${studyUID.length}" name="StudyInstanceUID">${studyUID}</element>
             <element tag="0040,a043" vr="SQ" vm="1" name="ConceptNameCodeSequence">
                 <item>
-                    <element tag="0008,0100" vr="SH" vm="1" len="${eValue.length}" name="RENAL_E">${eValue}</element>
-                    <element tag="0008,0102" vr="SH" vm="1" len="${nValue.length}" name="RENAL_N">${nValue}</element>
-                    <element tag="0008,0104" vr="LO" vm="1" len="${lValue.length}" name="RENAL_L">${lValue}</element>
+                    <element tag="0008,0100" vr="SH" vm="1" len="${eValueEscaped.length}" name="RENAL_E">${eValueEscaped}</element>
+                    <element tag="0008,0102" vr="SH" vm="1" len="${nValueEscaped.length}" name="RENAL_N">${nValueEscaped}</element>
+                    <element tag="0008,0104" vr="LO" vm="1" len="${lValueEscaped.length}" name="RENAL_L">${lValueEscaped}</element>
                 </item>
             </element>
         </data-set>
@@ -40,14 +53,12 @@ function handleRENALTag() {
     // 下載 XML 文件
     function download(text, name, type) {
         let a = document.createElement('a');
-        let file = new Blob([text], {
-            type: type
-        });
+        let file = new Blob([text], { type: type });
         a.href = window.URL.createObjectURL(file);
         a.download = name;
         a.click();
     }
 
-    download(xmlContent, sopUID + "_RENAL.xml", 'text/plain');
+    download(xmlContent, sopUID + "_RENAL.xml", 'text/xml');
     getByid('MouseOperation').click();
 }
